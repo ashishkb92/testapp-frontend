@@ -26,64 +26,133 @@
 
 <body>
 
+  <script src="https://unpkg.com/react@15.4.2/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@15.4.2/dist/react-dom.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.29/browser.js">
+    </script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+
+
+
 <div class="container">
 
-    <div class="input-group">
-        <input class="form-control" id="system-search" name="query" placeholder="Search for" required>
-                    <span class="input-group-btn">
-                        <button type="submit" class="btn btn-default"><i
-                                class="glyphicon glyphicon-search"></i></button>
-                    </span>
-    </div>
-    <br>
-    <form class="form-inline">
-        <div class="form-group">
-            <label for="sel1">Sort by:</label>
-            <select class="form-control" id="sel1">
-                <option value="id">ID</option>
-                <option value="first_name">First Name</option>
-                <option value="last_name">Last Name</option>
-                <option value="gender">Gender</option>
-                <option value="email">Email</option>
-                <option value="job_title">Job Title</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="sel2">Order:</label>
-            <select class="form-control" id="sel2">
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-            </select>
-        </div>
-    </form>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Gender</th>
-            <th>Email</th>
-            <th>Job Title</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
 
-                <td>{{ user.id }}</td>
-                <td>{{ user.first_name }}</td>
-                <td>{{ user.last_name }}</td>
-                <td>{{ user.gender }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.job_title }}</td>
-
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
 </div>
 
+<script type="text/babel" >
+
+
+
+//App component
+
+class App extends React.Component {
+  constructor(props){
+    super(props);
+
+    this.state = {
+      users : [],
+    };
+
+    this.userSearch('','id','asc');
+  }
+
+  userSearch(searchQuery, sortBy, order){
+    debugger;
+    if (typeof searchQuery === undefined){
+      searchQuery = '';
+    }
+    if (typeof sortBy === undefined){
+      sortBy = 'id';
+    }
+    if (typeof order === undefined){
+      order = 'asc';
+    }
+    const SEARCH_URL =  `http://127.0.0.1:5000/api/v1/search/?query=${searchQuery}&sort_by=${sortBy}&order=${order}`
+    axios.get(SEARCH_URL).then((response)=>{
+      this.setState({
+        users : response.data.results
+      });
+    });
+
+  }
+
+  render(){
+
+    const userSearch = _.debounce((searchQuery,sortBy,order)=>{this.userSearch(searchQuery,sortBy,order)},1000)
+    return (
+      <div>
+        <SearchBar onChange = {userSearch}  />
+      </div>
+    );
+  }
+
+}
+
+//SearchBar component
+
+class SearchBar extends React.Component{
+  constructor(props){
+    super(props);
+
+  }
+
+  handleChange (){
+    let term = this.refs.term.value;
+    let order = this.refs.order.value;
+    let sortBy = this.refs.sortBy.value;
+    this.props.onChange(term,sortBy,order);
+  }
+
+  render(){
+    return(
+      <div>
+        <br/>
+        <div className="input-group">
+            <input className="form-control" ref ="term" placeholder="Search for" required onChange = {this.handleChange.bind(this)} />
+                        <span className="input-group-btn">
+                            <button type="submit" className="btn btn-default"><i
+                                    className="glyphicon glyphicon-search"></i></button>
+                        </span>
+        </div>
+        <br/>
+        <form className="form-inline">
+            <div className="form-group">
+                <label >Sort by:</label>
+                <select ref ="sortBy" className="form-control" onChange = {this.handleChange.bind(this)}>
+                    <option value="id">ID</option>
+                    <option value="first_name">First Name</option>
+                    <option value="last_name">Last Name</option>
+                    <option value="gender">Gender</option>
+                    <option value="email">Email</option>
+                    <option value="job_title">Job Title</option>
+                </select>
+            </div>
+            <div className="form-group">
+                <label >Order:</label>
+                <select ref ="order" className="form-control"  onChange = {this.handleChange.bind(this)} >
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+        </form>
+      </div>
+    );
+  }
+
+}
+
+//UsersList Component
+
+
+
+ReactDOM.render(
+  <App />,
+  document.querySelector(".container")
+);
+
+</script>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
