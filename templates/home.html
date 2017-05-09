@@ -55,7 +55,7 @@ class App extends React.Component {
       users : [],
     };
 
-    this.userSearch('','id','asc');
+
   }
 
   userSearch(searchQuery, sortBy, order){
@@ -84,8 +84,14 @@ class App extends React.Component {
     return (
       <div>
         <SearchBar onChange = {userSearch}  />
+        <br/>
+        <UsersList users = {this.state.users} />
       </div>
     );
+  }
+
+  componentDidMount(){
+    this.userSearch('','id','asc');
   }
 
 }
@@ -144,7 +150,41 @@ class SearchBar extends React.Component{
 }
 
 //UsersList Component
+const UsersList = (props)=>{
+  const user = props.users.map((user)=>{
+    return (
 
+        <tr key = {user.id}  onClick={()=>window.open(`http://127.0.0.1:5000/view/${user.id}`)} >
+            <td>{user.id}</td>
+            <td>{user.first_name}</td>
+            <td>{user.last_name}</td>
+            <td>{user.gender}</td>
+            <td>{user.email}</td>
+            <td>{user.job_title}</td>
+        </tr>
+
+    );
+  });
+  return(
+    <div>
+      <table className="table table-striped table-hover">
+          <thead>
+          <tr>
+              <th>ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Gender</th>
+              <th>Email</th>
+              <th>Job Title</th>
+          </tr>
+          </thead>
+          <tbody>
+          {user}
+          </tbody>
+      </table>
+    </div>
+  );
+};
 
 
 ReactDOM.render(
